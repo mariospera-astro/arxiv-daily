@@ -11,9 +11,9 @@ dependencies = [
 ]
 
 [tool.arxiv_daily.app]
-timezone = "Asia/Shanghai"
-query = "cat:cs.LG"
-research_interests = ["Retrieval-Augmented Generation, RAG", "LLM for Recommendation", "Graph RAG", "Table RAG", "Agent", "Agentic RAG"]
-max_results = 10
-llm_base_url = "https://api.deepseek.com"
-llm_model_name = "deepseek-chat"
+timezone = "Europe/Rome"
+query = "astro-ph.SR"
+research_interests = ["population synthesis studies", "gravitational waves", "N-body simulations", "star clusters", "binary stars and binary-star processes", "mass transfer (stable/unstable)", "stellar winds", "black-hole astrophysics"]
+max_results = 20
+llm_base_url = "https://api.openai.com/v1"
+llm_model_name = "gpt-5-mini"
