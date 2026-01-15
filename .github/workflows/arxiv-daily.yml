@@ -92,6 +92,14 @@ jobs:
                   path: temp/*.md
                   if-no-files-found: warn
 
+            - name: Upload BibTeX file
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: recommended-bibtex
+                  path: temp/*.bib
+                  if-no-files-found: warn
+
             - name: Upload generated pdf
               uses: actions/upload-artifact@v4
               with:
