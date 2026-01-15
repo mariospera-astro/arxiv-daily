@@ -72,19 +72,52 @@ Abstract: {abstract}
     )
     logging.info(f"Received response from LLM: {response}")
     if response:
-        try:
-            recommend_obj = json.loads(response)
-            for item in recommend_obj:
-                paper_id = item.get("paper_id", "")
-                category = item.get("category", "").lower()
-                reason = item.get("reason", "")
-                for paper in papers:
-                    if paper.ID == paper_id:
-                        if category in recommend_papers:
-                            recommend_papers[category].append((paper, reason))
-                        else:
-                            recommend_papers[category] = [(paper, reason)]
-                        break
+        if not response:
+        raise RuntimeError("LLM returned empty response (None/empty string).")
+
+    try:
+        recommend_obj = json.loads(response)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"LLM did not return valid JSON. Raw response:\n{response}") from e
+
+    # Must be a JSON array
+    if not isinstance(recommend_obj, list):
+        raise RuntimeError(
+            f"LLM response must be a JSON array, got {type(recommend_obj).__name__}. Raw response:\n{response}"
+        )
+
+    # Validate each item
+    for idx, item in enumerate(recommend_obj):
+        if not isinstance(item, dict):
+            raise RuntimeError(
+                f"LLM array items must be objects, item {idx} is {type(item).__name__}. Raw response:\n{response}"
+            )
+
+        paper_id = item.get("paper_id")
+        category = item.get("category")
+        reason = item.get("reason", "")
+
+        if not isinstance(paper_id, str) or not paper_id.strip():
+            raise RuntimeError(f"Missing/invalid paper_id at item {idx}. Raw response:\n{response}")
+        if not isinstance(category, str) or not category.strip():
+            raise RuntimeError(f"Missing/invalid category at item {idx}. Raw response:\n{response}")
+        if not isinstance(reason, str):
+            raise RuntimeError(f"Invalid reason at item {idx} (must be string). Raw response:\n{response}")
+
+        category_l = category.lower()
+
+        # match paper by id
+        matched = False
+        for paper in papers:
+            if paper.ID == paper_id:
+                recommend_papers.setdefault(category_l, []).append((paper, reason))
+                matched = True
+                break
+
+        if not matched:
+            raise RuntimeError(
+                f"LLM returned paper_id '{paper_id}' not present in fetched papers. Raw response:\n{response}"
+            )
         except json.JSONDecodeError:
             logging.error("Failed to decode answer from LLM response.")
     return recommend_papers
