@@ -133,6 +133,21 @@ Abstract: {paper.abstract}
     return recommend_papers
 
 
+def export_bibtex(papers: list[Paper], output_path: Path):
+    with open(output_path, "w", encoding="utf-8") as f:
+        for p in papers:
+            authors = " and ".join(p.authors)
+            f.write(f"""@article{{{p.ID},
+  title={{ {p.title} }},
+  author={{ {authors} }},
+  year={{ {p.publish_date.year} }},
+  eprint={{ {p.ID} }},
+  archivePrefix={{arXiv}},
+  url={{ {p.link} }}
+}}
+
+""")
+
 if __name__ == "__main__":
     logging.info("Starting arXiv Daily Paper Recommendation Process")
     all_papers = get_arxiv_papers()
@@ -141,6 +156,16 @@ if __name__ == "__main__":
         logging.info("All latest papers have been processed before. Skip and exit.")
         exit(0)
     recommended_papers = get_recommend_papers(all_papers)
+    # Flatten recommended papers (remove duplicates)
+    recommended_list = []
+    seen_ids = set()
+
+    for category, items in recommended_papers.items():
+        for paper, _reason in items:
+            if paper.ID not in seen_ids:
+                recommended_list.append(paper)
+                seen_ids.add(paper.ID)
+    
     logging.info(
         f"Recommended {len(recommended_papers)} papers based on research interests.")
     logging.info("Process completed.")
@@ -156,6 +181,10 @@ if __name__ == "__main__":
     if pdf_file_path is not None:
         attachment_paths.append(pdf_file_path)
     send_email(attachment_paths=attachment_paths)
+
+    bib_path = Path("temp/recommended.bib")
+    export_bibtex(recommended_list, bib_path)
+    
     all_ids = [p.ID for p in all_papers]
     if all_ids:
         append_processed_ids(all_ids)
