@@ -78,7 +78,6 @@ def get_llm_json_response(system_prompt: str, user_prompt: str) -> str | None:
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ],
-        temperature=0,
     )
     return response.choices[0].message.content
 
