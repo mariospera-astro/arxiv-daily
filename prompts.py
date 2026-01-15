@@ -7,6 +7,7 @@ What are the papers worth recommending and what are the categories of research i
 Answer with JSON format and do not provide any additional explanation.
 You must output ONLY a valid JSON array as the entire response.
 No markdown, no backticks, no extra text, no surrounding object.
+Avoid paper of: pure numerical relativity, dark matter, primordial black holes, non-stellar compact objects.
 
 Schema of each array element:
 [
