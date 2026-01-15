@@ -49,17 +49,16 @@ def get_arxiv_papers() -> list[Paper]:
 
 
 def get_recommend_papers(papers: list[Paper]) -> dict[str, list[tuple[Paper, str]]]:
-    recommend_papers = {}
+    recommend_papers: dict[str, list[tuple[Paper, str]]] = {}
+
     user_research_interests = ", ".join(settings.research_interests)
+
     paper_info = ""
     for paper in papers:
-        title = paper.title
-        abstract = paper.abstract
-        paper_id = paper.ID
         paper_info += f"""
-Paper ID: {paper_id}
-Title: {title}
-Abstract: {abstract}
+Paper ID: {paper.ID}
+Title: {paper.title}
+Abstract: {paper.abstract}
 """
 
     logging.info("Generating recommendations using LLM.")
@@ -67,30 +66,34 @@ Abstract: {abstract}
         system_prompt=recommender_system_prompt,
         user_prompt=recommender_user_prompt.format(
             user_interests=user_research_interests,
-            paper_info=paper_info
-        )
+            paper_info=paper_info,
+        ),
     )
+
     logging.info(f"Received response from LLM: {response}")
-    if response:
-        if not response:
-        raise RuntimeError("LLM returned empty response (None/empty string).")
+
+    # --- STRICT VALIDATION: NO FALLBACK ---
+    if not response or not response.strip():
+        raise RuntimeError("LLM returned empty response (None or empty string).")
 
     try:
         recommend_obj = json.loads(response)
     except json.JSONDecodeError as e:
-        raise RuntimeError(f"LLM did not return valid JSON. Raw response:\n{response}") from e
+        raise RuntimeError(
+            f"LLM did not return valid JSON.\nRaw response:\n{response}"
+        ) from e
 
     # Must be a JSON array
     if not isinstance(recommend_obj, list):
         raise RuntimeError(
-            f"LLM response must be a JSON array, got {type(recommend_obj).__name__}. Raw response:\n{response}"
+            f"LLM response must be a JSON array, got {type(recommend_obj).__name__}.\nRaw response:\n{response}"
         )
 
-    # Validate each item
+    # Validate and process items
     for idx, item in enumerate(recommend_obj):
         if not isinstance(item, dict):
             raise RuntimeError(
-                f"LLM array items must be objects, item {idx} is {type(item).__name__}. Raw response:\n{response}"
+                f"LLM array items must be objects. Item {idx} is {type(item).__name__}.\nRaw response:\n{response}"
             )
 
         paper_id = item.get("paper_id")
@@ -98,15 +101,23 @@ Abstract: {abstract}
         reason = item.get("reason", "")
 
         if not isinstance(paper_id, str) or not paper_id.strip():
-            raise RuntimeError(f"Missing/invalid paper_id at item {idx}. Raw response:\n{response}")
+            raise RuntimeError(
+                f"Missing or invalid paper_id at item {idx}.\nRaw response:\n{response}"
+            )
+
         if not isinstance(category, str) or not category.strip():
-            raise RuntimeError(f"Missing/invalid category at item {idx}. Raw response:\n{response}")
+            raise RuntimeError(
+                f"Missing or invalid category at item {idx}.\nRaw response:\n{response}"
+            )
+
         if not isinstance(reason, str):
-            raise RuntimeError(f"Invalid reason at item {idx} (must be string). Raw response:\n{response}")
+            raise RuntimeError(
+                f"Invalid reason at item {idx} (must be string).\nRaw response:\n{response}"
+            )
 
         category_l = category.lower()
 
-        # match paper by id
+        # Match paper by ID
         matched = False
         for paper in papers:
             if paper.ID == paper_id:
@@ -116,10 +127,9 @@ Abstract: {abstract}
 
         if not matched:
             raise RuntimeError(
-                f"LLM returned paper_id '{paper_id}' not present in fetched papers. Raw response:\n{response}"
+                f"LLM returned paper_id '{paper_id}' not present in fetched papers.\nRaw response:\n{response}"
             )
-        except json.JSONDecodeError:
-            logging.error("Failed to decode answer from LLM response.")
+
     return recommend_papers
 
 
