@@ -1,0 +1,10 @@
+topics:
+  - name: "LLM Theory"
+    query: '(cat:cs.LG OR cat:cs.CL) AND ("large language model" OR LLM) AND (theory OR generalization)'
+    max_results: 20
+    zotero_collection: "arXiv / LLM Theory"
+
+  - name: "Optimization"
+    query: 'cat:cs.LG AND (optimization OR convergence)'
+    max_results: 15
+    zotero_collection: "arXiv / Optimization"
