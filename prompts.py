@@ -5,13 +5,16 @@ My research interests: {user_interests}
 {paper_info}
 What are the papers worth recommending and what are the categories of research interests, why do you recommend them?
 Answer with JSON format and do not provide any additional explanation.
-Example output:
-[
-{{
-    "paper_id": "2302.02342v1",
-    "category": "RAG",
-    "reason": "This paper introduces a novel approach to retrieval-augmented generation (RAG) that significantly improves performance on various benchmarks. The method is innovative and aligns well with my research interests in RAG."
-}}
-]
+You must output ONLY a valid JSON array as the entire response.
+No markdown, no backticks, no extra text, no surrounding object.
+
+Schema of each array element:
+{
+  "paper_id": "<string>",
+  "category": "<string>",
+  "reason": "<string>"
+}
+
+If no papers match, output [].
 Do not forget to include the brackets [] and the quotes around each paper ID.
 """
