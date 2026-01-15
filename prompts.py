@@ -9,12 +9,13 @@ You must output ONLY a valid JSON array as the entire response.
 No markdown, no backticks, no extra text, no surrounding object.
 
 Schema of each array element:
-{
+[
+  {{
   "paper_id": "<string>",
   "category": "<string>",
   "reason": "<string>"
-}
-
+  }}
+]
 If no papers match, output [].
 Do not forget to include the brackets [] and the quotes around each paper ID.
 """
