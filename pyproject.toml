@@ -14,6 +14,6 @@ dependencies = [
 timezone = "Europe/Rome"
 query = "(cat:astro-ph.CO OR cat:astro-ph.EP OR cat:astro-ph.GA OR cat:astro-ph.HE OR cat:astro-ph.IM OR cat:astro-ph.SR)"
 research_interests = ["population synthesis studies", "gravitational waves for stellar compact objects", "N-body simulations", "star clusters simulations and populations", "binary stars and binary-star processes", "mass transfer (stable/unstable) in binaries", "stellar winds and stellar rotation", "stellar black-hole astrophysics", "dust and metals from binary stars"]
-max_results = 70
+max_results = 100
 llm_base_url = "https://api.openai.com/v1"
 llm_model_name = "gpt-5-mini"
